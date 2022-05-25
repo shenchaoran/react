@@ -89,9 +89,10 @@ function SettingsContextController({
     'React::DevTools::displayDensity',
     'compact',
   );
+  const initialTheme = window.matchMedia('(prefers-color-scheme: dark)').matches? 'dark' : 'light';
   const [theme, setTheme] = useLocalStorage<Theme>(
     'React::DevTools::theme',
-    'auto',
+    initialTheme,
   );
   const [
     appendComponentStack,

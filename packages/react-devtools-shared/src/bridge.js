@@ -375,6 +375,47 @@ class Bridge<
     }
   }
 
+  clean() {
+    if (this._isShutdown) {
+      console.warn('Bridge was already shutdown.');
+      return;
+    }
+
+    // Queue the shutdown outgoing message for subscribers.
+    // this.send('shutdown');
+
+    // Mark this bridge as destroyed, i.e. disable its public API.
+    this._isShutdown = true;
+
+    // Disable the API inherited from EventEmitter that can add more listeners and send more messages.
+    // $FlowFixMe This property is not writable.
+    this.addListener = function() {};
+    // $FlowFixMe This property is not writable.
+    this.emit = function() {};
+    // NOTE: There's also EventEmitter API like `on` and `prependListener` that we didn't add to our Flow type of EventEmitter.
+
+    // Unsubscribe this bridge incoming message listeners to be sure, and so they don't have to do that.
+    this.removeAllListeners();
+
+    // Stop accepting and emitting incoming messages from the wall.
+    const wallUnlisten = this._wallUnlisten;
+    if (wallUnlisten) {
+      wallUnlisten();
+    }
+
+    // Synchronously flush all queued outgoing messages.
+    // At this step the subscribers' code may run in this call stack.
+    do {
+      this._flush();
+    } while (this._messageQueue.length);
+
+    // Make sure once again that there is no dangling timer.
+    if (this._timeoutID !== null) {
+      clearTimeout(this._timeoutID);
+      this._timeoutID = null;
+    }
+  }
+
   _flush = () => {
     // This method is used after the bridge is marked as destroyed in shutdown sequence,
     // so we do not bail out if the bridge marked as destroyed.

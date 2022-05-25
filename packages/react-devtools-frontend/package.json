@@ -1,0 +1,18 @@
+{
+  "name": "@hippy/react-devtools",
+  "version": "0.1.0",
+  "files": ["dist"],
+  "scripts": {
+    "start": "cross-env NODE_ENV=development webpack serve",
+    "build": "cross-env NODE_ENV=production webpack"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^4.43.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.0.0-beta.0",
+    "cross-env": "^7.0.3",
+    "html-webpack-plugin": "^4.3.0"
+  }
+}

@@ -333,21 +333,23 @@ export function useHighlightNativeElement() {
       const element = store.getElementByID(id);
       const rendererID = store.getRendererIDForElement(id);
       if (element !== null && rendererID !== null) {
-        bridge.send('highlightNativeElement', {
-          displayName: element.displayName,
-          hideAfterTimeout: false,
-          id,
-          openNativeElementsPanel: false,
-          rendererID,
-          scrollIntoView: false,
-        });
+        return;
+        // bridge.send('highlightNativeElement', {
+        //   displayName: element.displayName,
+        //   hideAfterTimeout: false,
+        //   id,
+        //   openNativeElementsPanel: false,
+        //   rendererID,
+        //   scrollIntoView: false,
+        // });
       }
     },
     [store, bridge],
   );
 
   const clearHighlightNativeElement = useCallback(() => {
-    bridge.send('clearNativeElementHighlight');
+    return;
+    // bridge.send('clearNativeElementHighlight');
   }, [bridge]);
 
   return {

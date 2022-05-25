@@ -64,14 +64,15 @@ export default function InspectedElementWrapper(_: Props) {
     if (element !== null && inspectedElementID !== null) {
       const rendererID = store.getRendererIDForElement(inspectedElementID);
       if (rendererID !== null) {
-        bridge.send('highlightNativeElement', {
-          displayName: element.displayName,
-          hideAfterTimeout: true,
-          id: inspectedElementID,
-          openNativeElementsPanel: true,
-          rendererID,
-          scrollIntoView: true,
-        });
+        return;
+        // bridge.send('highlightNativeElement', {
+        //   displayName: element.displayName,
+        //   hideAfterTimeout: true,
+        //   id: inspectedElementID,
+        //   openNativeElementsPanel: true,
+        //   rendererID,
+        //   scrollIntoView: true,
+        // });
       }
     }
   }, [bridge, element, inspectedElementID, store]);
