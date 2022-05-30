@@ -66,13 +66,14 @@
      useHttps = false,
      port = 8097,
      path = '',
+     protocol,
      websocket,
      resolveRNStyle = null,
      retryConnectionDelay = 2000,
      isAppActive = () => true,
    } = options || {};
 
-   const protocol = useHttps ? 'wss' : 'ws';
+   protocol ??= useHttps ? 'wss' : 'ws';
    let retryTimeoutID: TimeoutID | null = null;
 
    function scheduleRetry() {
