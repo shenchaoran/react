@@ -10,6 +10,7 @@ const HippyReactDevtoolsPlugin = require('@hippy/hippy-react-devtools-plugin');
 module.exports = {
   // add this plugin to webpack config
   plugins: [
+    // note this plugin must create before of '@hippy/hippy-react-refresh-webpack-plugin' if you use hmr
     new HippyReactDevtoolsPlugin({
       protocol: 'http',
       host: 'localhost',

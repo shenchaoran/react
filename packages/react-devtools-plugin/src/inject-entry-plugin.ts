@@ -43,96 +43,107 @@ const schema: Schema = {
 }
 
 function injectEntryWebpack5(
-  options: Compiler['options'],
+  compiler: Compiler,
   entryName?: string,
   prepends: string[] = [],
   appends: string[] = [],
 ): void {
-  const entry: any =
-    typeof options.entry === 'function'
-      ? options.entry()
-      : Promise.resolve(options.entry)
+  const { options } = compiler;
+
+  /**
+   * EntryPlugin will prepend entry to the head of entry list
+   * When use EntryPlugin muti-times, will follow FIFO sequence like queue
+   * so use EntryPlugin can ensure more stable of entry sequence
+   */
+  const EntryPlugin = (webpack as any).EntryPlugin;
+  if (EntryPlugin) {
+    // Prepended entries does not care about injection order,
+    prepends.forEach((entry) => {
+      new EntryPlugin(compiler.context, entry, { name: undefined }).apply(compiler as any);
+    });
+    prepends = [];
+  }
+
+  const entry: any = typeof options.entry === 'function' ? options.entry() : Promise.resolve(options.entry);
 
   options.entry = () =>
     entry.then((entryObj: any) => {
       function injectOneEntry(entryName: string) {
-        const injectEntry: typeof entryObj[string] | undefined = entryObj[entryName]
+        const injectEntry: typeof entryObj[string] | undefined = entryObj[entryName];
         if (!injectEntry?.import) {
           throw new Error(
             `Could not find an entry named '${entryName}'. See https://webpack.js.org/concepts/entry-points/ for an overview of webpack entries.`,
-          )
+          );
         }
-        prepends.forEach(prepend => {
-          if (!injectEntry.import.includes(prepend)) injectEntry.import.unshift(prepend)
-        })
-        appends.forEach(append => {
-          if (!injectEntry.import.includes(append)) injectEntry.import.push(append)
-        })
-        return entryObj
+        prepends.forEach((prepend) => {
+          if (!injectEntry.import.includes(prepend)) injectEntry.import.unshift(prepend);
+        });
+        appends.forEach((append) => {
+          if (!injectEntry.import.includes(append)) injectEntry.import.push(append);
+        });
+        return entryObj;
       }
 
       if (entryName) {
-        injectOneEntry(entryName)
+        injectOneEntry(entryName);
       } else {
-        Object.keys(entryObj).forEach(entryName => {
-          injectOneEntry(entryName)
-        })
+        Object.keys(entryObj).forEach((entryName) => {
+          injectOneEntry(entryName);
+        });
       }
-      return entryObj
-    })
+      return entryObj;
+    });
 }
 
 function injectEntryWebpack4(
-  options: Compiler['options'],
+  compiler: Compiler,
   entryName?: string,
   prepends: string[] = [],
   appends: string[] = [],
 ): void {
-  function injectEntry(
-    entry: Exclude<Configuration['entry'], EntryFunc>,
-  ): string[] | Entry {
+  const { options } = compiler;
+  function injectEntry(entry: Exclude<Configuration['entry'], EntryFunc>): string[] | Entry {
     switch (typeof entry) {
       case 'undefined': {
         throw new Error(
           `Could not find an entry named '${entryName}'. See https://webpack.js.org/concepts/entry-points/ for an overview of webpack entries.`,
-        )
+        );
       }
       case 'string': {
-        return [...prepends, entry, ...appends]
+        return [...prepends, entry, ...appends];
       }
       case 'object': {
         if (Array.isArray(entry)) {
-          prepends.forEach(file => {
-            if (!entry.includes(file)) entry.unshift(file)
-          })
-          appends.forEach(file => {
-            if (!entry.includes(file)) entry.push(file)
-          })
-          return entry
-        } else {
-          if (entryName) {
-            return {
-              ...entry,
-              [entryName]: injectEntry(entry[entryName]) as unknown as string[],
-            }
-          }
-          Object.keys(entry).forEach(key => {
-            entry[key] = injectEntry(entry[key]) as unknown as string[]
-          })
-          return entry
+          prepends.forEach((file) => {
+            if (!entry.includes(file)) entry.unshift(file);
+          });
+          appends.forEach((file) => {
+            if (!entry.includes(file)) entry.push(file);
+          });
+          return entry;
         }
+        if (entryName) {
+          return {
+            ...entry,
+            [entryName]: injectEntry(entry[entryName]) as unknown as string[],
+          };
+        }
+        Object.keys(entry).forEach((key) => {
+          entry[key] = injectEntry(entry[key]) as unknown as string[];
+        });
+        return entry;
       }
       default: {
-        const _exhaust: never = entry
-        return _exhaust
+        const _exhaust: never = entry;
+        return _exhaust;
       }
     }
   }
 
-  const entry = options.entry
+  const { entry } = options;
   typeof entry === 'function'
     ? (options.entry = () => Promise.resolve(entry()).then(injectEntry))
-    : (options.entry = () => injectEntry(entry))
+    : (options.entry = () => injectEntry(entry));
 }
 
 export default class InjectEntryPlugin {
@@ -149,9 +160,9 @@ export default class InjectEntryPlugin {
   apply(compiler: Compiler): void {
     const { entry, prepends, appends } = this.config
     if (!webpack.version || webpack.version.startsWith('4')) {
-      injectEntryWebpack4(compiler.options, entry, prepends, appends)
+      injectEntryWebpack4(compiler, entry, prepends, appends)
     } else {
-      injectEntryWebpack5(compiler.options, entry, prepends, appends)
+      injectEntryWebpack5(compiler, entry, prepends, appends)
     }
   }
 }

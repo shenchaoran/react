@@ -44,18 +44,18 @@ export class InjectReactDevtoolsPlugin {
   private injectEntryPlugin: InjectEntryPlugin
   constructor(options: InjectReactDevtoolsEntryPluginConfig) {
     validate(schema, options, {
-      name: 'Inject Vue Devtools Entry Webpack Plugin',
+      name: 'Inject React Devtools Entry Webpack Plugin',
       baseDataPath: 'options',
     })
     this.options = options
     this.injectEntryPlugin = new InjectEntryPlugin({
-      prepends: [path.join(__dirname, 'hook.js')],
-      appends: [makeUrl(path.join(__dirname, 'backend.js'), this.options)],
+      prepends: [makeUrl(path.join(__dirname, 'backend.js'), this.options)],
+      appends: [],
     })
   }
 
   apply(compiler: Compiler) {
-    compiler.hooks.environment.tap('InjectReactDevtoolsPlugin', (compilation) => {
+    compiler.hooks.environment.tap(InjectReactDevtoolsPlugin.name, (compilation) => {
       this.injectEntryPlugin.apply(compiler)
     })
   }
