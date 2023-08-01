@@ -1,6 +1,6 @@
 {
   "name": "@hippy/hippy-react-devtools-plugin",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "",
   "files": [
     "lib"
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hippy-contrib/hippy-react-devtools-plugin.git"
+    "url": "git+https://github.com/shenchaoran/react.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/hippy-contrib/hippy-react-devtools-plugin/issues"
   },
-  "homepage": "https://github.com/hippy-contrib/hippy-react-devtools-plugin#readme",
+  "homepage": "https://github.com/shenchaoran/react/tree/main/packages/react-devtools-plugin",
   "peerDependencies": {
     "webpack": "^4.37.0 || ^5.24.2"
   },
